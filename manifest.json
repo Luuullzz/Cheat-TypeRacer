@@ -1,0 +1,10 @@
+{
+  "name": "Cheat TypeRacer",
+  "version": "1.0",
+  "manifest_version": 3,
+  "description": "Cheat play.typeracer.com using me",
+  "permissions": ["activeTab", "scripting", "tabs", "storage"],
+  "action": {
+    "default_popup": "popup.html"
+  }
+}
