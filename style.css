@@ -33,3 +33,15 @@
   font-family: sans-serif;
   margin-left: 5px;
 }
+
+
+.alert {
+  display: none;
+  padding: 5px;
+  background-color: rgb(90, 255, 192);
+  border: 0.5px solid rgb(0, 189, 57);
+  border-radius: 5px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 12px;
+  transition: all 0.8s ease;
+}

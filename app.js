@@ -1,21 +1,42 @@
+const timeInput = document.getElementById('timeInput');
+chrome.storage.sync.get(['time'], (result) => {
+  timeInput.value = result.time;
+});
+
+const modeSelect = document.getElementById('mode');
+chrome.storage.sync.get(['mode'], (result) => {
+  modeSelect.value = result.mode;
+  const keydownEvent = new Event('change');
+  modeSelect.dispatchEvent(keydownEvent);
+});
+
+timeInput.addEventListener('change', (event) => {
+  chrome.storage.sync.set({ time: event.target.value });
+});
+
 document.getElementById('mode').addEventListener('change', () => {
-  console.log('changing mode');
   const mode = document.getElementById('mode').value;
-  if (mode === 'manual') document.getElementById('timeInput').disabled = true;
-  else document.getElementById('timeInput').disabled = false;
-  console.log(document.getElementById('timeInput'));
+  chrome.storage.sync.set({ mode });
+  if (mode === 'manual') {
+    document.getElementById('timeInput').disabled = true;
+    const alert = document.querySelector('.alert');
+    alert.style.display = 'block';
+    alert.innerText = 'Press Ctrl + / for typing';
+    setTimeout(() => {
+      alert.style.display = 'none';
+    }, 1500);
+  } else document.getElementById('timeInput').disabled = false;
 });
 
 document.getElementById('btnCheat').addEventListener('click', async () => {
   try {
     const mode = document.getElementById('mode').value;
-    const time = document.getElementById('timeInput').value;
     const [tab] = await chrome.tabs.query({
       active: true,
       currentWindow: true,
     });
 
-    chrome.storage.sync.set({ tab, mode, time });
+    chrome.storage.sync.set({ tab, mode });
 
     chrome.scripting.executeScript({
       target: { tabId: tab.id },
@@ -40,6 +61,14 @@ extractRaceText = async (tab, mode, time) => {
         );
         return;
       }
+
+      const timeDisplay = document.querySelector('.timeDisplay');
+      const startingIn = timeDisplay.querySelector('.time');
+      if(!startingIn.getAttribute('title') && mode !== 'manual') {
+        alert('Race hasn\'t started yet');
+        return ;
+      }
+
       const inputPanel = document.querySelector('.inputPanel');
       if (!inputPanel) return;
       const tds = inputPanel.querySelectorAll('[align="left"]');
@@ -61,14 +90,13 @@ extractRaceText = async (tab, mode, time) => {
         }, time);
       } else if (mode === 'manual') {
         document.addEventListener('keydown', (event) => {
-          if (event.key == 'n' && index < words.length)
+          if (event.key == '/' && event.ctrlKey && index < words.length)
             typeNextWord(words[index++], input);
         });
       }
     }; //end typeText
 
     const typeNextWord = (word, input) => {
-      console.log(word);
       input.value += word;
     }; //end typeNextWord
   } catch (err) {
